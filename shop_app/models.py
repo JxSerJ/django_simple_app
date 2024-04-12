@@ -36,3 +36,6 @@ class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+
+    def __repr__(self):
+        return f'{self.order} - {self.product} - {self.quantity}'

@@ -7,8 +7,8 @@ urlpatterns = [
     path('create_product/', views.create_product, name='create_product'),
     path('create_order/', views.create_order, name='create_order'),
     path('create_order_detail/', views.create_order_detail, name='create_order_detail'),
-    path('order_details_for_client/', views.order_details_for_client, name='order_details_for_client'),
     path('delete_order/', views.delete_order, name='delete_order'),
     path('delete_product/', views.delete_product, name='delete_product'),
     path('update_product/', views.update_product, name='update_product'),
+    path('client_orders/<int:client_id>', views.client_orders, name='update_order'),
 ]

@@ -1,6 +1,9 @@
+import datetime
+
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 
 from .models import Client, Product, Order, OrderDetail
 
@@ -88,8 +91,54 @@ def update_product(request, *args, **kwargs):
         return HttpResponse(f'Product id: {product.pk} updated.')
 
 
-def order_details_for_client(request, *args, **kwargs):
-    client_id_from_request = request.GET.get('client')
-    orders = list(Order.objects.filter(client=client_id_from_request))
-    return HttpResponse(f'Ok')
+def client_orders(request, client_id, *args, **kwargs):
+    order_detail = OrderDetail.objects.filter(order__client_id=client_id).select_related('product', 'order').order_by('-order__date')
+    for order in order_detail:
+        print(order.order.date)
 
+    # products_7_days = order_detail.filter(order__date__gte=timezone.now().date() - datetime.timedelta(days=7))
+    # products_30_days = order_detail.filter(order__date__gte=timezone.now().date() - datetime.timedelta(days=30))
+    # products_365_days = order_detail.filter(order__date__gte=timezone.now().date() - datetime.timedelta(days=365))
+
+    products_7_days = []
+    products_30_days = []
+    products_365_days = []
+    products = []
+
+    for order_detail in order_detail:
+        if (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=7)
+                and order_detail.product not in products):
+
+            print(order_detail.order.date)
+            print(timezone.now().date() - datetime.timedelta(days=7))
+            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=7))
+
+            products_7_days.append(order_detail.product)
+            products.append(order_detail.product)
+        elif (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=30)
+              and order_detail.product not in products):
+
+            print(order_detail.order.date)
+            print(timezone.now().date() - datetime.timedelta(days=30))
+            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=30))
+
+            products_30_days.append(order_detail.product)
+            products.append(order_detail.product)
+        elif (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=365)
+              and order_detail.product not in products):
+
+            print(order_detail.order.date)
+            print(timezone.now().date() - datetime.timedelta(days=365))
+            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=365))
+
+            products_365_days.append(order_detail.product)
+            products.append(order_detail.product)
+
+    context = {
+        'title': f'Client {client_id} Orders',
+        'products_7_days': products_7_days,
+        'products_30_days': products_30_days,
+        'products_365_days': products_365_days,
+    }
+
+    return render(request, 'products.html', context)
