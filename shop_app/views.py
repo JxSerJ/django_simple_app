@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.files.storage import FileSystemStorage
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -83,14 +84,16 @@ def delete_product(request, *args, **kwargs):
 
 def update_product(request, *args, **kwargs):
     title = 'Update Product'
+    message = 'Update Product data'
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product_id_from_request = form.cleaned_data.get('id')
             product = Product.objects.get(pk=product_id_from_request)
             product.name = form.cleaned_data.get('name')
             product.description = form.cleaned_data.get('description')
             product.price = form.cleaned_data.get('price')
+            product.image = form.cleaned_data.get('image')
             product.save()
             message = 'Product updated successfully'
     else:

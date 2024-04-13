@@ -15,6 +15,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=1000, decimal_places=2)
     creation_date = models.DateField(auto_now=True)
+    image = models.ImageField(null=True, blank=True)
 
 
 class Order(models.Model):

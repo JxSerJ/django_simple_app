@@ -10,3 +10,4 @@ class ProductForm(forms.Form):
         'class': 'form-control', 'placeholder': 'Enter Product description'
     }))
     price = forms.DecimalField(max_digits=1000, decimal_places=2)
+    image = forms.ImageField()
