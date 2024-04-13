@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from .models import Client, Product, Order, OrderDetail
+from .forms import ProductForm
 
 
 def create_initial_data(request, *args, **kwargs):
@@ -81,14 +82,21 @@ def delete_product(request, *args, **kwargs):
 
 
 def update_product(request, *args, **kwargs):
-    if request.method == 'PUT':
-        product_id_from_request = request.PUT.get('product')
-        product = Product.objects.get(pk=product_id_from_request)
-        product.name = request.PUT.get('name')
-        product.description = request.PUT.get('description')
-        product.price = request.PUT.get('price')
-        product.save()
-        return HttpResponse(f'Product id: {product.pk} updated.')
+    title = 'Update Product'
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product_id_from_request = form.cleaned_data.get('id')
+            product = Product.objects.get(pk=product_id_from_request)
+            product.name = form.cleaned_data.get('name')
+            product.description = form.cleaned_data.get('description')
+            product.price = form.cleaned_data.get('price')
+            product.save()
+            message = 'Product updated successfully'
+    else:
+        message = 'Enter new data'
+        form = ProductForm()
+    return render(request, 'product_form.html', {'form': form, 'message': message, 'title': title})
 
 
 def client_orders(request, client_id, *args, **kwargs):
@@ -108,29 +116,16 @@ def client_orders(request, client_id, *args, **kwargs):
     for order_detail in order_detail:
         if (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=7)
                 and order_detail.product not in products):
-
-            print(order_detail.order.date)
-            print(timezone.now().date() - datetime.timedelta(days=7))
-            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=7))
-
             products_7_days.append(order_detail.product)
             products.append(order_detail.product)
+
         elif (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=30)
               and order_detail.product not in products):
-
-            print(order_detail.order.date)
-            print(timezone.now().date() - datetime.timedelta(days=30))
-            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=30))
-
             products_30_days.append(order_detail.product)
             products.append(order_detail.product)
+
         elif (order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=365)
               and order_detail.product not in products):
-
-            print(order_detail.order.date)
-            print(timezone.now().date() - datetime.timedelta(days=365))
-            print(order_detail.order.date >= timezone.now().date() - datetime.timedelta(days=365))
-
             products_365_days.append(order_detail.product)
             products.append(order_detail.product)
 
